@@ -26,7 +26,19 @@ import { getWorkingDaysCount } from "utils/Calculate";
 import { getLocalStorage, setLocalStorage } from "utils/Storage";
 import { getRandomMessage } from "utils/Message";
 
-const AddEvent = ({ onClick }) => {
+type SettingsInfoProps = {
+  settings: { title: string; endDate: string };
+  countryCode: string;
+  onLoadSettings: () => void;
+  onOpenSettings: () => void;
+  onSelectCountry: (code: string) => void;
+};
+
+type AddEventArgs = {
+  onClick: () => void;
+};
+
+const AddEvent = ({ onClick }: AddEventArgs) => {
   const AddButton = withStyles({
     root: {
       backgroundColor: COLOR_BLUE,
@@ -46,13 +58,13 @@ const AddEvent = ({ onClick }) => {
   );
 };
 
-const SettingsInfo = ({
+function SettingsInfo({
   settings,
   countryCode,
   onLoadSettings,
   onOpenSettings,
   onSelectCountry,
-}) => {
+}: SettingsInfoProps) {
   return (
     <div className="settings-info">
       <CountrySelector code={countryCode} onSelect={onSelectCountry} />
@@ -75,20 +87,21 @@ const SettingsInfo = ({
       </Button>
     </div>
   );
-};
+}
 const DateCalculator = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const prevEndDate = usePrevious(endDate);
 
-  const [workDays, setWorkDays] = useState("-");
-  const [calendarDays, setCalendarDays] = useState("-");
-  const [percent, setPercent] = useState(0);
-  const [message, setMessage] = useState("🎁");
+  const [workDays, setWorkDays] = useState<number | string>("-");
+  const [calendarDays, setCalendarDays] = useState<number | string>("-");
+  const [percent, setPercent] = useState<number>(0);
+  const [message, setMessage] = useState<string>("🎁");
 
-  const [openSettings, setOpenSettings] = useState(false);
-  const [settings, setSettings] = useState(null);
-  const [countryCode, setCountryCode] = useState(null);
+  const [openSettings, setOpenSettings] = useState<boolean>(false);
+  const [settings, setSettings] =
+    useState<{ title: string; endDate: string } | null>(null);
+  const [countryCode, setCountryCode] = useState<string>("");
 
   const [showTimer, setTimer] = useState(false);
 
@@ -108,8 +121,8 @@ const DateCalculator = () => {
     setTimer(false);
   }, [startDate, endDate]);
 
-  function usePrevious(value) {
-    const ref = useRef();
+  function usePrevious(value: Date | null) {
+    const ref = useRef<Date | null>(null);
     useEffect(() => {
       ref.current = value;
     });
@@ -134,7 +147,7 @@ const DateCalculator = () => {
     setOpenSettings((prevState) => !prevState);
   };
 
-  const handleDateChange = (type, value) => {
+  const handleDateChange = (type: string, value: Date) => {
     if (type === TYPE_START) setStartDate(value);
     if (type === TYPE_END) setEndDate(value);
   };
@@ -153,8 +166,8 @@ const DateCalculator = () => {
     const calculated = getWorkingDaysCount(countryCode, startDate, endDate);
 
     if (!calculated) {
-      const requiredMsg = document.querySelector(".required");
-      requiredMsg.classList.toggle("show");
+      const requiredMsg = document.querySelector(".required") as HTMLElement;
+      requiredMsg?.classList.toggle("show");
 
       setTimeout(() => {
         requiredMsg.classList.toggle("show");
@@ -163,8 +176,8 @@ const DateCalculator = () => {
     }
 
     const { calendarDays, workDays } = calculated;
-    setCalendarDays(calendarDays || "-");
-    setWorkDays(workDays || "-");
+    setCalendarDays(calendarDays);
+    setWorkDays(workDays);
 
     const baseDate = moment(endDate).subtract(2, "years");
     const passedDates = moment(startDate).diff(moment(baseDate), "days") + 1;
@@ -184,7 +197,7 @@ const DateCalculator = () => {
     setMessage(randomMessage);
   };
 
-  const handleSaveSettings = (data) => {
+  const handleSaveSettings = (data: { title: string; date: Date }) => {
     const { title, date } = data;
     const ddaySettings = {
       title,
@@ -197,9 +210,7 @@ const DateCalculator = () => {
     loadFromLocalStorage();
   };
 
-  const handleSelectCountry = (code) => {
-    console.log("code", code);
-
+  const handleSelectCountry = (code: string) => {
     if (typeof code !== "string") return;
 
     setLocalStorage(COUNTRY_KEY, code);
@@ -235,18 +246,16 @@ const DateCalculator = () => {
         <DateSelector
           startDate={startDate}
           endDate={endDate}
-          title={settings ? settings.title : ""}
           onDateChange={handleDateChange}
           onCalculate={handleCalculate}
-          onOpenSettings={toggleOpen}
         />
         <Card align="left">
           <i className="icon-work" />
-          {workDays} working days
+          {workDays || "-"} working days
         </Card>
         <Card align="left">
           <i className="icon-date" />
-          {calendarDays} calendar days
+          {calendarDays || "-"} calendar days
         </Card>
         {isKR && <ProgressBar value={percent} />}
         <TimeCounter endDate={showTimer ? endDate : null} />
@@ -256,7 +265,7 @@ const DateCalculator = () => {
         {openSettings && (
           <SettingsModal
             open={openSettings}
-            settings={settings || {}}
+            settings={settings || null}
             onClose={toggleOpen}
             onSave={handleSaveSettings}
           />

@@ -5,7 +5,7 @@ import moment from "moment";
 import Card from "components/Card";
 
 type TimeCounterProps = {
-  endDate: string;
+  endDate: Date | null;
 };
 
 type Time = {

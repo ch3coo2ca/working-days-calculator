@@ -13,7 +13,7 @@ import Input from "components/Input";
 
 type SettingsModalProps = {
   open: boolean;
-  settings: { endDate: string; title: string };
+  settings: { endDate: string; title: string } | null;
   onClose: () => void;
   onSave: (value: { title: string; date: Date }) => void;
 };

@@ -12,16 +12,16 @@ import Button from "@material-ui/core/Button";
 import Calendar from "react-calendar";
 
 type DateSelectorProps = {
-  startDate: Date;
-  endDate: Date;
-  onDateChange: () => void;
+  startDate: Date | null;
+  endDate: Date | null;
+  onDateChange: (type: string, value: Date) => void;
   onCalculate: () => void;
 };
 
 type DateProps = {
   id: string;
   name: string;
-  value: Date;
+  value: Date | null;
   onChange: (id: string, date: Date) => void;
   onToggleCalendar: (id: string) => void;
 };
@@ -129,7 +129,7 @@ function DateSelector({
 }
 
 function Date({ id, name, value, onChange, onToggleCalendar }: DateProps) {
-  const formattedValue = value && moment(value).format(DATE_FORMAT);
+  const formattedValue = value ? moment(value).format(DATE_FORMAT) : "";
   return (
     <div className="date-wrapper">
       <Text>{name} </Text>
